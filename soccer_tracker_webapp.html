@@ -1,0 +1,279 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Soccer Tracker</title>
+  <style>
+    body {
+      margin: 0;
+      font-family: Arial, sans-serif;
+      background: #1a1a1a;
+      color: #fff;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding: 1rem;
+    }
+    #main {
+      display: flex;
+      gap: 2rem;
+    }
+    #pitch {
+      background: url('https://media.istockphoto.com/id/978332866/vector/football-ground-field-vector-illustration.jpg?s=612x612&w=0&k=20&c=U6e7eYcVTz9Q-lFpGyRYJQhkjcB4lND-5mACQyT6QcU=') no-repeat center center;
+      background-size: cover;
+      width: 800px;
+      height: 500px;
+      position: relative;
+      border: 2px solid #ccc;
+    }
+    .player {
+      width: 20px;
+      height: 20px;
+      background-color: red;
+      border-radius: 50%;
+      position: absolute;
+      cursor: grab;
+      user-select: none;
+      z-index: 1;
+    }
+    .player-label {
+      position: absolute;
+      color: white;
+      font-size: 12px;
+      text-align: center;
+      transform: translate(-50%, -120%);
+      pointer-events: none;
+      z-index: 2;
+    }
+    #player-names {
+      display: grid;
+      grid-template-columns: repeat(2, auto);
+      gap: 0.5rem 1rem;
+      margin-right: auto;
+      margin-left: 0;
+      padding-right: 2rem;
+    }
+    .player-name-input {
+      padding: 0.3rem;
+      font-size: 0.9rem;
+      width: 120px;
+    }
+    #buttons {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+    .clock {
+      font-size: 1.2rem;
+      margin-bottom: 0.5rem;
+    }
+    .clock input, .date input {
+      width: 40px;
+      text-align: center;
+      font-size: 1.2rem;
+      margin: 0 0.2rem;
+    }
+    button {
+      padding: 0.5rem 1rem;
+      font-size: 1rem;
+      cursor: pointer;
+      margin-top: 0.5rem;
+    }
+    #player-table-container {
+      display: flex;
+      flex-direction: column;
+      align-items: flex-start;
+    }
+    #player-table {
+      display: grid;
+      grid-template-columns: repeat(2, auto);
+      gap: 0.3rem 1rem;
+    }
+    #player-table input {
+      width: 120px;
+    }
+  </style>
+</head>
+<body>
+  <h1>Soccer Player Tracker</h1>
+  <div id="main">
+    <div id="player-table-container">
+      <div id="player-table"></div>
+      <button onclick="togglePlayerTable()">Players</button>
+    </div>
+    <div>
+      <div id="pitch"></div>
+    </div>
+  </div>
+
+  <div style="display: flex; flex-direction: column; align-items: center;">
+    <div style="display: flex; justify-content: center; align-items: flex-start; gap: 2rem;">
+      <div id="player-names"></div>
+      <div id="buttons">
+        <div class="opponent">
+          Opponent: <input type="text" id="opponent" placeholder="Opponent Name">
+        </div>
+        <div class="date">
+          Date: <input type="number" id="month" placeholder="MM" min="1" max="12"> / 
+          <input type="number" id="day" placeholder="DD" min="1" max="31"> / 
+          <input type="number" id="year" placeholder="YYYY" min="2020" max="2100">
+        </div>
+        <div class="clock">
+          Time: <input type="number" id="minTens" value="0" min="0" max="9"> <input type="number" id="minOnes" value="0" min="0" max="9">
+        </div>
+        <button onclick="saveFrame()">Save Frame</button>
+        <button onclick="saveToSheet()">Save Frame to Sheet</button>
+        $1
+      </div>
+    </div>
+  </div>
+
+$1  const WEB_APP_URL = "https://script.google.com/macros/s/YOUR_WEB_APP_ID/exec";
+  const pitch = document.getElementById('pitch');
+  const players = {};
+  const playerLabels = {};
+  const log = [];
+
+  const playerNamesContainer = document.getElementById('player-names');
+  const playerTableContainer = document.getElementById('player-table');
+  const playerNameInputs = [];
+  const playerNameOptions = [];
+
+  function updateDropdowns() {
+    const names = playerNameOptions.map(input => input.value);
+    playerNameInputs.forEach((select, index) => {
+      const current = select.value;
+      select.innerHTML = '';
+      names.forEach(name => {
+        const option = document.createElement('option');
+        option.value = name;
+        option.text = name;
+        select.appendChild(option);
+      });
+      select.value = names.includes(current) ? current : names[0];
+      if (playerLabels[`P${index + 1}`]) {
+        playerLabels[`P${index + 1}`].innerText = select.value;
+      }
+    });
+  }
+
+  for (let i = 0; i < 20; i++) {
+    const optionInput = document.createElement('input');
+    optionInput.value = `Player ${i + 1}`;
+    optionInput.addEventListener('input', updateDropdowns);
+    playerTableContainer.appendChild(optionInput);
+    playerNameOptions.push(optionInput);
+  }
+
+  function togglePlayerTable() {
+    playerTableContainer.style.display = playerTableContainer.style.display === 'none' ? 'grid' : 'none';
+  }
+
+  updateDropdowns();
+
+  for (let i = 1; i <= 10; i++) {
+    const select = document.createElement('select');
+    select.className = 'player-name-input';
+    playerNamesContainer.appendChild(select);
+    playerNameInputs.push(select);
+
+    const el = document.createElement('div');
+    el.classList.add('player');
+    el.style.left = `${80 + ((i - 1) % 5) * 140}px`;
+    el.style.top = `${100 + Math.floor((i - 1) / 5) * 200}px`;
+    el.dataset.id = `P${i}`;
+    pitch.appendChild(el);
+    players[`P${i}`] = el;
+
+    const label = document.createElement('div');
+    label.className = 'player-label';
+    label.innerText = `Player ${i}`;
+    label.style.left = el.style.left;
+    label.style.top = el.style.top;
+    pitch.appendChild(label);
+    playerLabels[`P${i}`] = label;
+
+    makeDraggable(el, label);
+
+    select.addEventListener('change', () => {
+      label.innerText = select.value;
+    });
+  }
+
+  updateDropdowns();
+
+  function makeDraggable(el, label) {
+    let offsetX, offsetY;
+    el.addEventListener('mousedown', e => {
+      offsetX = e.offsetX;
+      offsetY = e.offsetY;
+      function onMouseMove(e) {
+        const left = e.pageX - pitch.offsetLeft - offsetX;
+        const top = e.pageY - pitch.offsetTop - offsetY;
+        el.style.left = `${left}px`;
+        el.style.top = `${top}px`;
+        label.style.left = `${left + 10}px`;
+        label.style.top = `${top}px`;
+      }
+      function onMouseUp() {
+        document.removeEventListener('mousemove', onMouseMove);
+        document.removeEventListener('mouseup', onMouseUp);
+      }
+      document.addEventListener('mousemove', onMouseMove);
+      document.addEventListener('mouseup', onMouseUp);
+    });
+  }
+
+  function saveFrame() {
+    const timestamp = Date.now();
+    const minTens = document.getElementById('minTens').value;
+    const minOnes = document.getElementById('minOnes').value;
+    const minutes = `${minTens}${minOnes}`;
+    const date = `${document.getElementById('month').value}/${document.getElementById('day').value}/${document.getElementById('year').value}`;
+    const opponent = document.getElementById('opponent').value;
+    for (let i = 1; i <= 10; i++) {
+      const id = `P${i}`;
+      const name = playerNameInputs[i - 1].value;
+      const p = players[id];
+      const x = parseInt(p.style.left);
+      const y = parseInt(p.style.top);
+      log.push({ timestamp, date, minutes, opponent, id, name, x, y });
+      playerLabels[id].innerText = name;
+    }
+    alert('Frame saved!');
+  }
+
+  $1
+  function saveToSheet() {
+    const minTens = document.getElementById('minTens').value;
+    const minOnes = document.getElementById('minOnes').value;
+    const minutes = `${minTens}${minOnes}`;
+    const date = `${document.getElementById('month').value}/${document.getElementById('day').value}/${document.getElementById('year').value}`;
+    const opponent = document.getElementById('opponent').value;
+    const timestamp = Date.now();
+
+    const frameData = [];
+    for (let i = 1; i <= 10; i++) {
+      const id = `P${i}`;
+      const name = playerNameInputs[i - 1].value;
+      const p = players[id];
+      const x = parseInt(p.style.left);
+      const y = parseInt(p.style.top);
+      frameData.push({ timestamp, date, minutes, opponent, id, name, x, y });
+    }
+
+    fetch(WEB_APP_URL, {
+      method: 'POST',
+      mode: 'no-cors',
+      headers: {
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify(frameData)
+    })
+    .then(() => alert("Frame sent to Google Sheet!"))
+    .catch(err => alert("Error sending frame: " + err));
+  }
+</script>
+</body>
+</html>
