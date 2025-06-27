@@ -128,7 +128,7 @@
     </div>
   </div>
   <script>
-const WEB_APP_URL = "https://script.google.com/macros/s/AKfycbyZIuZXImiDYixlPSlUMpeTR7sTPH92zsGZHb1nGtfMG5YslEBYxfrzw6zyRDUAXYqDPw/exec";
+const WEB_APP_URL = "https://script.google.com/macros/s/AKfycbz_T46edxkWOuqERBb4-a7yRgJqGDW87JCK9rElh6r7h4tGJL60LeoscProKyLl4JWapQ/exec";
 
 const pitch = document.getElementById('pitch');
 const players = {};
@@ -239,29 +239,36 @@ function saveToSheet() {
   const date = `${document.getElementById('month').value}/${document.getElementById('day').value}/${document.getElementById('year').value}`;
   const opponent = document.getElementById('opponent').value;
   const timestamp = Date.now();
-  const frameData = [];
+
+  const playersData = [];
+
   for (let i = 1; i <= 10; i++) {
     const id = `P${i}`;
     const name = playerNameInputs[i - 1].value;
     const p = players[id];
     const x = parseInt(p.style.left);
     const y = parseInt(p.style.top);
-    frameData.push({ timestamp, date, minutes, opponent, id, name, x, y });
+
+    playersData.push({ id, name, x, y });
   }
-  fetch(WEB_APP_URL, {
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/json'
-    },
-    body: JSON.stringify(frameData)
-  })
-  .then(response => {
-    if (!response.ok) throw new Error(`Network response was not ok: ${response.statusText}`);
-    return response.text();
-  })
-  .then(() => alert("Frame sent to Google Sheet!"))
-  .catch(err => alert("Error sending frame: " + err.message));
+
+  const params = new URLSearchParams({
+    timestamp,
+    date,
+    minutes,
+    opponent,
+    players: JSON.stringify(playersData)
+  });
+
+  fetch(`${WEB_APP_URL}?${params.toString()}`)
+    .then(res => res.text())
+    .then(txt => {
+      alert("Frame sent to Google Sheet!");
+      console.log("Response:", txt);
+    })
+    .catch(err => alert("Error sending frame: " + err.message));
 }
+
 
 function togglePlayerTable() {
   const table = document.getElementById("player-table");
