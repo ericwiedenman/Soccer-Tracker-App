@@ -130,7 +130,140 @@
   <script>
 const WEB_APP_URL = "https://script.google.com/macros/s/AKfycbxf9gmV-nR33hwN1hn8z7DKpCIcdgnpg5QkVn_nuxZr4ht50j93G_Zb4dddXXrIQoh9XA/exec";
 
-// JavaScript logic would be inserted or retained here
+const pitch = document.getElementById('pitch');
+const players = {};
+const playerLabels = {};
+const playerNamesContainer = document.getElementById('player-names');
+const playerTableContainer = document.getElementById('player-table');
+const playerNameInputs = [];
+const playerNameOptions = [];
+
+function updateDropdowns() {
+  const names = playerNameOptions.map(input => input.value);
+  playerNameInputs.forEach((select, index) => {
+    const current = select.value;
+    select.innerHTML = '';
+    names.forEach(name => {
+      const option = document.createElement('option');
+      option.value = name;
+      option.text = name;
+      select.appendChild(option);
+    });
+    select.value = names.includes(current) ? current : names[0];
+    if (playerLabels[`P${index + 1}`]) {
+      playerLabels[`P${index + 1}`].innerText = select.value;
+    }
+  });
+}
+
+for (let i = 0; i < 20; i++) {
+  const optionInput = document.createElement('input');
+  optionInput.value = `Player ${i + 1}`;
+  optionInput.addEventListener('input', updateDropdowns);
+  playerTableContainer.appendChild(optionInput);
+  playerNameOptions.push(optionInput);
+}
+
+for (let i = 1; i <= 10; i++) {
+  const select = document.createElement('select');
+  select.className = 'player-name-input';
+  playerNamesContainer.appendChild(select);
+  playerNameInputs.push(select);
+
+  const el = document.createElement('div');
+  el.classList.add('player');
+  el.style.left = `${80 + ((i - 1) % 5) * 140}px`;
+  el.style.top = `${100 + Math.floor((i - 1) / 5) * 200}px`;
+  el.dataset.id = `P${i}`;
+  pitch.appendChild(el);
+  players[`P${i}`] = el;
+
+  const label = document.createElement('div');
+  label.className = 'player-label';
+  label.innerText = `Player ${i}`;
+  label.style.left = el.style.left;
+  label.style.top = el.style.top;
+  pitch.appendChild(label);
+  playerLabels[`P${i}`] = label;
+
+  makeDraggable(el, label);
+  select.addEventListener('change', () => {
+    label.innerText = select.value;
+  });
+}
+
+function makeDraggable(el, label) {
+  let offsetX, offsetY;
+  el.addEventListener('mousedown', e => {
+    offsetX = e.offsetX;
+    offsetY = e.offsetY;
+    function onMouseMove(e) {
+      const left = e.pageX - pitch.offsetLeft - offsetX;
+      const top = e.pageY - pitch.offsetTop - offsetY;
+      el.style.left = `${left}px`;
+      el.style.top = `${top}px`;
+      label.style.left = `${left + 10}px`;
+      label.style.top = `${top}px`;
+    }
+    function onMouseUp() {
+      document.removeEventListener('mousemove', onMouseMove);
+      document.removeEventListener('mouseup', onMouseUp);
+    }
+    document.addEventListener('mousemove', onMouseMove);
+    document.addEventListener('mouseup', onMouseUp);
+  });
+}
+
+function saveFrame() {
+  const timestamp = Date.now();
+  const minTens = document.getElementById('minTens').value;
+  const minOnes = document.getElementById('minOnes').value;
+  const minutes = `${minTens}${minOnes}`;
+  const date = `${document.getElementById('month').value}/${document.getElementById('day').value}/${document.getElementById('year').value}`;
+  const opponent = document.getElementById('opponent').value;
+  for (let i = 1; i <= 10; i++) {
+    const id = `P${i}`;
+    const name = playerNameInputs[i - 1].value;
+    const p = players[id];
+    const x = parseInt(p.style.left);
+    const y = parseInt(p.style.top);
+    console.log({ timestamp, date, minutes, opponent, id, name, x, y });
+  }
+  alert('Frame saved!');
+}
+
+function saveToSheet() {
+  const minTens = document.getElementById('minTens').value;
+  const minOnes = document.getElementById('minOnes').value;
+  const minutes = `${minTens}${minOnes}`;
+  const date = `${document.getElementById('month').value}/${document.getElementById('day').value}/${document.getElementById('year').value}`;
+  const opponent = document.getElementById('opponent').value;
+  const timestamp = Date.now();
+  const frameData = [];
+  for (let i = 1; i <= 10; i++) {
+    const id = `P${i}`;
+    const name = playerNameInputs[i - 1].value;
+    const p = players[id];
+    const x = parseInt(p.style.left);
+    const y = parseInt(p.style.top);
+    frameData.push({ timestamp, date, minutes, opponent, id, name, x, y });
+  }
+  fetch(WEB_APP_URL, {
+    method: 'POST',
+    mode: 'no-cors',
+    headers: {
+      'Content-Type': 'application/json'
+    },
+    body: JSON.stringify(frameData)
+  })
+  .then(() => alert("Frame sent to Google Sheet!"))
+  .catch(err => alert("Error sending frame: " + err));
+}
+
+function togglePlayerTable() {
+  const table = document.getElementById("player-table");
+  table.style.display = table.style.display === "none" ? "grid" : "none";
+}
   </script>
 </body>
 </html>
