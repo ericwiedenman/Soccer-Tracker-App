@@ -248,7 +248,7 @@ function saveToSheet() {
     const y = parseInt(p.style.top);
     frameData.push({ timestamp, date, minutes, opponent, id, name, x, y });
   }
-  fetch("https://script.google.com/macros/library/d/1il-Ycm0zudTEq-vbEwqyK_NGjfPUEehsrVZ6dcmWsiYuxupgatDEwzTx/2", {
+  fetch("/d/1il-Ycm0zudTEq-vbEwqyK_NGjfPUEehsrVZ6dcmWsiYuxupgatDEwzTx/2", {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json'
