@@ -128,7 +128,7 @@
     </div>
   </div>
   <script>
-const WEB_APP_URL = "https://script.google.com/macros/s/AKfycbz_T46edxkWOuqERBb4-a7yRgJqGDW87JCK9rElh6r7h4tGJL60LeoscProKyLl4JWapQ/exec";
+const WEB_APP_URL = "https://script.google.com/macros/s/AKfycbzgxtv6c05gXZc5WPIASgMcnOK9g2TeNKfo87fDv-HhMlnNo5VE6Mt6fZ-zs_bneHACXw/exec";
 
 const pitch = document.getElementById('pitch');
 const players = {};
@@ -257,17 +257,19 @@ function saveToSheet() {
     date,
     minutes,
     opponent,
-    players: JSON.stringify(playersData)
+    players: JSON.stringify(playersData),
+    callback: 'handleResponse'
   });
 
-  fetch(`${WEB_APP_URL}?${params.toString()}`)
-    .then(res => res.text())
-    .then(txt => {
-      alert("Frame sent to Google Sheet!");
-      console.log("Response:", txt);
-    })
-    .catch(err => alert("Error sending frame: " + err.message));
+  const script = document.createElement('script');
+  script.src = `${WEB_APP_URL}?${params.toString()}`;
+  document.body.appendChild(script);
 }
+
+function handleResponse(response) {
+  alert("Response from Google Script: " + response);
+}
+
 
 
 function togglePlayerTable() {
