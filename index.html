@@ -1,11 +1,11 @@
-<!DOCTYPE html>More actions
+<!DOCTYPE html>
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Soccer Tracker</title>
   <style>
-    body {
+    body {More actions
       margin: 0;
       font-family: Arial, sans-serif;
       background: #1a1a1a;
@@ -68,8 +68,14 @@
       font-size: 1.2rem;
       margin-bottom: 0.5rem;
     }
-    .clock input, .date input {
-      width: 60px;
+    .clock input {
+      width: 40px;
+      text-align: center;
+      font-size: 1.2rem;
+      margin: 0 0.2rem;
+    }
+    .date input {
+      width: 40px;
       text-align: center;
       font-size: 1.2rem;
       margin: 0 0.2rem;
@@ -96,7 +102,7 @@
   </style>
 </head>
 <body>
-  <h1>Soccer Player Tracker</h1>
+  <h1>Player Position Tracker</h1>
   <div id="main">
     <div id="player-table-container">
       <div id="player-table"></div>
@@ -268,7 +274,7 @@ function saveToSheet() {
 
     playersData.push({ id, name, x, y });
   }
-
+  
   const params = new URLSearchParams({
     timestamp,
     date,
