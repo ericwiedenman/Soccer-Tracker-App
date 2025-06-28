@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Soccer Tracker</title>
+  <title>Position Tracker</title>
   <style>
     body {
       margin: 0;
@@ -68,12 +68,17 @@
       font-size: 1.2rem;
       margin-bottom: 0.5rem;
     }
-    .clock input, .date input {
+    .clock input {
       width: 40px;
       text-align: center;
       font-size: 1.2rem;
       margin: 0 0.2rem;
     }
+    .date input {
+      width: 60px;
+      text-align: center;
+      font-size: 1.2rem;
+      margin: 0 0.2rem;
     button {
       padding: 0.5rem 1rem;
       font-size: 1rem;
@@ -96,7 +101,7 @@
   </style>
 </head>
 <body>
-  <h1>Soccer Player Tracker</h1>
+  <h1>Player Position Tracker</h1>
   <div id="main">
     <div id="player-table-container">
       <div id="player-table"></div>
@@ -122,13 +127,17 @@
         <div class="clock">
           Time: <input type="number" id="minTens" value="0" min="0" max="9"> <input type="number" id="minOnes" value="0" min="0" max="9">
         </div>
-        <button onclick="saveFrame()">Save Frame</button>
+        <button onclick="resetPositions()">Reset Positions</button>
         <button onclick="saveToSheet()">Save Frame to Sheet</button>
       </div>
     </div>
   </div>
   <script>
 const WEB_APP_URL = "https://script.google.com/macros/s/AKfycbzgxtv6c05gXZc5WPIASgMcnOK9g2TeNKfo87fDv-HhMlnNo5VE6Mt6fZ-zs_bneHACXw/exec";
+const defaultPositions = {
+      P1: [170, 445], P2: [170, 35], P3: [170, 315], P4: [170, 170], P5: [390, 375],
+      P6: [640, 375], P7: [390, 105], P8: [640, 235], P9: [640, 105], P10: [390, 235]
+    };
 
 const pitch = document.getElementById('pitch');
 const players = {};
@@ -232,25 +241,18 @@ window.addEventListener('load', () => {
   document.getElementById('year').value = today.getFullYear();
 });
 
-function saveFrame() {
-  const timestamp = Date.now();
-  const minTens = document.getElementById('minTens').value;
-  const minOnes = document.getElementById('minOnes').value;
-  const minutes = `${minTens}${minOnes}`;
-  const date = `${document.getElementById('month').value}/${document.getElementById('day').value}/${document.getElementById('year').value}`;
-  const opponent = document.getElementById('opponent').value;
-  for (let i = 1; i <= 10; i++) {
-    const id = `P${i}`;
-    const name = playerNameInputs[i - 1].value;
-    const p = players[id];
-    const x = parseInt(p.style.left);
-    const y = parseInt(p.style.top);
-    console.log({ timestamp, date, minutes, opponent, id, name, x, y });
-  }
-  alert('Frame saved!');
-}
-
-function saveToSheet() {
+  function resetPositions() {
+      for (let i = 1; i <= 10; i++) {
+        const id = `P${i}`;
+        const [x, y] = defaultPositions[id];
+        const el = players[id];
+        const label = playerLabels[id];
+        el.style.left = `${x}px`;
+        el.style.top = `${y}px`;
+        label.style.left = `${x + 10}px`;
+        label.style.top = `${y}px`;
+    
+  function saveToSheet() {
   const minTens = document.getElementById('minTens').value;
   const minOnes = document.getElementById('minOnes').value;
   const minutes = `${minTens}${minOnes}`;
