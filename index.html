@@ -91,7 +91,7 @@
       align-items: flex-start;
     }
     #player-table {
-      display: none;
+      display: grid;
       grid-template-columns: repeat(2, auto);
       gap: 0.3rem 1rem;
     }
@@ -166,7 +166,6 @@ function updateDropdowns() {
     if (playerLabels[`P${index + 1}`]) {
       playerLabels[`P${index + 1}`].innerText = select.value;
     }
-    localStorage.setItem(`playerSelect${index}`, select.value);
   });
 }
 
@@ -188,8 +187,8 @@ for (let i = 1; i <= 10; i++) {
   const el = document.createElement('div');
   el.classList.add('player');
   const [x, y] = defaultPositions[`P${i}`];
-  label.style.left = `${x + 10}px`;
-  label.style.top = `${y}px`;
+  el.style.left = `${x}px`;
+  el.style.top = `${y}px`;
   el.dataset.id = `P${i}`;
   pitch.appendChild(el);
   players[`P${i}`] = el;
@@ -197,8 +196,8 @@ for (let i = 1; i <= 10; i++) {
   const label = document.createElement('div');
   label.className = 'player-label';
   label.innerText = `Player ${i}`;
-  label.style.left = el.style.left;
-  label.style.top = el.style.top;
+  label.style.left = `${x + 10}px`;
+  label.style.top = `${y}px`;
   pitch.appendChild(label);
   playerLabels[`P${i}`] = label;
 
