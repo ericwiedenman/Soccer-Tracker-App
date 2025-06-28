@@ -140,6 +140,7 @@ const playerNameOptions = [];
 
 function updateDropdowns() {
   const names = playerNameOptions.map(input => input.value);
+  localStorage.setItem('playerOptions', JSON.stringify(names));
   playerNameInputs.forEach((select, index) => {
     const current = select.value;
     select.innerHTML = '';
@@ -153,12 +154,14 @@ function updateDropdowns() {
     if (playerLabels[`P${index + 1}`]) {
       playerLabels[`P${index + 1}`].innerText = select.value;
     }
+    localStorage.setItem(`playerSelect${index}`, select.value);
   });
 }
 
+const savedNames = JSON.parse(localStorage.getItem('playerOptions')) || [];
 for (let i = 0; i < 20; i++) {
   const optionInput = document.createElement('input');
-  optionInput.value = `Player ${i + 1}`;
+  optionInput.value = savedNames[i] || `Player ${i + 1}`;
   optionInput.addEventListener('input', updateDropdowns);
   playerTableContainer.appendChild(optionInput);
   playerNameOptions.push(optionInput);
@@ -189,8 +192,16 @@ for (let i = 1; i <= 10; i++) {
   makeDraggable(el, label);
   select.addEventListener('change', () => {
     label.innerText = select.value;
+    localStorage.setItem(`playerSelect${i - 1}`, select.value);
   });
 }
+
+updateDropdowns();
+
+playerNameInputs.forEach((select, i) => {
+  const saved = localStorage.getItem(`playerSelect${i}`);
+  if (saved) select.value = saved;
+});
 
 function makeDraggable(el, label) {
   let offsetX, offsetY;
@@ -213,6 +224,13 @@ function makeDraggable(el, label) {
     document.addEventListener('mouseup', onMouseUp);
   });
 }
+
+window.addEventListener('load', () => {
+  const today = new Date();
+  document.getElementById('month').value = today.getMonth() + 1;
+  document.getElementById('day').value = today.getDate();
+  document.getElementById('year').value = today.getFullYear();
+});
 
 function saveFrame() {
   const timestamp = Date.now();
@@ -269,8 +287,6 @@ function saveToSheet() {
 function handleResponse(response) {
   alert("Response from Google Script: " + response);
 }
-
-
 
 function togglePlayerTable() {
   const table = document.getElementById("player-table");
