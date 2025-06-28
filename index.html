@@ -69,10 +69,24 @@
       margin-bottom: 0.5rem;
     }
     .clock input, .date input {
-      width: 40px;
+      -moz-appearance: textfield;
+      appearance: textfield;
       text-align: center;
       font-size: 1.2rem;
       margin: 0 0.2rem;
+    }
+    .date input::-webkit-outer-spin-button,
+    .date input::-webkit-inner-spin-button,
+    .clock input::-webkit-outer-spin-button,
+    .clock input::-webkit-inner-spin-button {
+      -webkit-appearance: none;
+      margin: 0;
+    }
+    .date input#year {
+      width: 60px;
+    }
+    .date input:not(#year), .clock input {
+      width: 40px;
     }
     button {
       padding: 0.5rem 1rem;
@@ -122,7 +136,7 @@
         <div class="clock">
           Time: <input type="number" id="minTens" value="0" min="0" max="9"> <input type="number" id="minOnes" value="0" min="0" max="9">
         </div>
-        <button onclick="saveFrame()">Save Frame</button>
+        <button onclick="resetPositions()">Reset Position</button>
         <button onclick="saveToSheet()">Save Frame to Sheet</button>
       </div>
     </div>
@@ -232,23 +246,17 @@ window.addEventListener('load', () => {
   document.getElementById('year').value = today.getFullYear();
 });
 
-function saveFrame() {
-  const timestamp = Date.now();
-  const minTens = document.getElementById('minTens').value;
-  const minOnes = document.getElementById('minOnes').value;
-  const minutes = `${minTens}${minOnes}`;
-  const date = `${document.getElementById('month').value}/${document.getElementById('day').value}/${document.getElementById('year').value}`;
-  const opponent = document.getElementById('opponent').value;
-  for (let i = 1; i <= 10; i++) {
-    const id = `P${i}`;
-    const name = playerNameInputs[i - 1].value;
-    const p = players[id];
-    const x = parseInt(p.style.left);
-    const y = parseInt(p.style.top);
-    console.log({ timestamp, date, minutes, opponent, id, name, x, y });
-  }
-  alert('Frame saved!');
-}
+  function resetPositions() {
+      for (let i = 1; i <= 10; i++) {
+        const id = `P${i}`;
+        const [x, y] = defaultPositions[id];
+        const el = players[id];
+        const label = playerLabels[id];
+        el.style.left = `${x}px`;
+        el.style.top = `${y}px`;
+        label.style.left = `${x + 10}px`;
+        label.style.top = `${y}px`;
+      }
 
 function saveToSheet() {
   const minTens = document.getElementById('minTens').value;
