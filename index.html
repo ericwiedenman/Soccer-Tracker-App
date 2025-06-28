@@ -91,7 +91,7 @@
       align-items: flex-start;
     }
     #player-table {
-      display: grid;
+      display: none;
       grid-template-columns: repeat(2, auto);
       gap: 0.3rem 1rem;
     }
@@ -150,6 +150,9 @@ const playerNameOptions = [];
 function updateDropdowns() {
   const names = playerNameOptions.map(input => input.value);
   localStorage.setItem('playerOptions', JSON.stringify(names));
+  for (let i = 0; i < 10; i++) {
+    localStorage.setItem(`playerSelect${i}`, names[i] || `Player ${i + 1}`);
+  }
   playerNameInputs.forEach((select, index) => {
     const current = select.value;
     select.innerHTML = '';
@@ -184,8 +187,9 @@ for (let i = 1; i <= 10; i++) {
 
   const el = document.createElement('div');
   el.classList.add('player');
-  el.style.left = `${80 + ((i - 1) % 5) * 140}px`;
-  el.style.top = `${100 + Math.floor((i - 1) / 5) * 200}px`;
+  const [x, y] = defaultPositions[`P${i}`];
+  label.style.left = `${x + 10}px`;
+  label.style.top = `${y}px`;
   el.dataset.id = `P${i}`;
   pitch.appendChild(el);
   players[`P${i}`] = el;
@@ -293,7 +297,7 @@ function handleResponse(response) {
 }
 
 function togglePlayerTable() {
-  const table = document.getElementById("player-table");
+  const container = document.getElementById("player-table");
   table.style.display = table.style.display === "none" ? "grid" : "none";
 }
   </script>
