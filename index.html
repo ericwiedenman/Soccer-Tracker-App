@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+<!DOCTYPE html>More actions
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
@@ -69,24 +69,10 @@
       margin-bottom: 0.5rem;
     }
     .clock input, .date input {
-      -moz-appearance: textfield;
-      appearance: textfield;
+      width: 60px;
       text-align: center;
       font-size: 1.2rem;
       margin: 0 0.2rem;
-    }
-    .date input::-webkit-outer-spin-button,
-    .date input::-webkit-inner-spin-button,
-    .clock input::-webkit-outer-spin-button,
-    .clock input::-webkit-inner-spin-button {
-      -webkit-appearance: none;
-      margin: 0;
-    }
-    .date input#year {
-      width: 60px;
-    }
-    .date input:not(#year), .clock input {
-      width: 40px;
     }
     button {
       padding: 0.5rem 1rem;
@@ -136,14 +122,18 @@
         <div class="clock">
           Time: <input type="number" id="minTens" value="0" min="0" max="9"> <input type="number" id="minOnes" value="0" min="0" max="9">
         </div>
-        <button onclick="resetPositions()">Reset Position</button>
+        <button onclick="resetPositions()">Reset Positions</button>
         <button onclick="saveToSheet()">Save Frame to Sheet</button>
       </div>
     </div>
   </div>
   <script>
 const WEB_APP_URL = "https://script.google.com/macros/s/AKfycbzgxtv6c05gXZc5WPIASgMcnOK9g2TeNKfo87fDv-HhMlnNo5VE6Mt6fZ-zs_bneHACXw/exec";
-
+const defaultPositions = {
+      P1: [170, 445], P2: [170, 35], P3: [170, 315], P4: [170, 170], P5: [390, 375],
+      P6: [640, 375], P7: [390, 105], P8: [640, 235], P9: [640, 105], P10: [390, 235]
+    };
+    
 const pitch = document.getElementById('pitch');
 const players = {};
 const playerLabels = {};
@@ -175,6 +165,7 @@ function updateDropdowns() {
 const savedNames = JSON.parse(localStorage.getItem('playerOptions')) || [];
 for (let i = 0; i < 20; i++) {
   const optionInput = document.createElement('input');
+  optionInput.value = `Player ${i + 1}`;
   optionInput.value = savedNames[i] || `Player ${i + 1}`;
   optionInput.addEventListener('input', updateDropdowns);
   playerTableContainer.appendChild(optionInput);
@@ -246,7 +237,7 @@ window.addEventListener('load', () => {
   document.getElementById('year').value = today.getFullYear();
 });
 
-  function resetPositions() {
+function resetPositions() {
       for (let i = 1; i <= 10; i++) {
         const id = `P${i}`;
         const [x, y] = defaultPositions[id];
@@ -295,6 +286,8 @@ function saveToSheet() {
 function handleResponse(response) {
   alert("Response from Google Script: " + response);
 }
+
+
 
 function togglePlayerTable() {
   const table = document.getElementById("player-table");
